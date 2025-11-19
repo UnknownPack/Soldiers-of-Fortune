@@ -24,7 +24,7 @@ namespace DevelopersHub.ProceduralTilemapGenerator2D.Tools
         {
             float x = Input.GetAxis("Horizontal");
             float y = Input.GetAxis("Vertical");
-            _rigidbody.velocity = new Vector2(x, y) * _moveSpeed;
+            _rigidbody.linearVelocity = new Vector2(x, y) * _moveSpeed;
         }
 
         private void FixedUpdate()
