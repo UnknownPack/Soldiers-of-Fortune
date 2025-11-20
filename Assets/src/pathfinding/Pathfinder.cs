@@ -1,16 +1,19 @@
+using System.Collections.Generic;
+using System.Linq;
+using src.grid_management;
 using UnityEngine;
 
-public class Pathfinder
-{
-     public static class PathFinder
-    {
+namespace src.pathfinding
+{ 
+    public static class PathFinder
+    { 
         public static readonly Vector2Int[] CardinalDirections = {
             Vector2Int.up,
             Vector2Int.down,
             Vector2Int.left,
             Vector2Int.right,
-        };
-
+        }; 
+        
         public static readonly Vector2Int[] IntercardinalDirections =
         {
             new Vector2Int(-1, -1),
@@ -23,54 +26,50 @@ public class Pathfinder
 
         private static int GenericGCost = 1;
 
-        public static List<GridCell> GetPath(Dictionary<Vector2Int, GridCell> cellDictionary, GridCell startCell, GridCell endCell)
+        public static List<Node> GetPath(Dictionary<Vector2Int, Node> nodeDictionary, Node startNode, Node endNode)
         {
-            if (cellDictionary.Count <= 0)
+            if (nodeDictionary.Count <= 0)
             {
                 Debug.LogError("Cell dictionary is empty.");
                 return null;
             }
 
-            Dictionary<Vector2Int, PF_Node> temporaryNodeDictioanry = ProduceNodeDictionary(cellDictionary);
-
-            if (!DoesCellExist(startCell.gridPosition, temporaryNodeDictioanry) ||
-                !DoesCellExist(endCell.gridPosition, temporaryNodeDictioanry))
+            if (!DoesCellExist(startNode.gridPosition, nodeDictionary) ||
+                !DoesCellExist(endNode.gridPosition, nodeDictionary))
             {
                 return null;
             }
+            
+            ResetAllNodes(nodeDictionary);
+            List<Node> openSet = new List<Node>();
+            List<Node> closedSet = new List<Node>();
 
-            List<PF_Node> openSet = new List<PF_Node>();
-            List<PF_Node> closedSet = new List<PF_Node>();
-
-            PF_Node startNode = temporaryNodeDictioanry[startCell.gridPosition];
-            PF_Node endNode = temporaryNodeDictioanry[endCell.gridPosition];
 
             openSet.Add(startNode);
-            startNode.GCost = 0;
-            startNode.HCost = Get_HCost(startNode, endNode);
+            startNode.gCost = 0;
+            startNode.hCost = Get_HCost(startNode, endNode);
 
             while (openSet.Count > 0)
             {
-                PF_Node currentNode = GetLowestFCostNode(openSet);
+                Node currentNode = GetLowestFCostNode(openSet);
                 openSet.Remove(currentNode);
                 closedSet.Add(currentNode);
 
-                if (!NotSameCell(currentNode.cell, endNode.cell))
+                if (!NotSameNode(currentNode, endNode))
                     return ReconstructPath(startNode, endNode);
 
-                foreach (PF_Node neighbour in GetNeighbours(currentNode.cell, temporaryNodeDictioanry, CardinalDirections.ToList()))
+                foreach (Node neighbour in GetNeighbours(currentNode, nodeDictionary, CardinalDirections.ToList()))
                 {
-                    bool canNavigate = neighbour.cell.canNavigate, containsInClosedSet = closedSet.Contains(neighbour);
+                    bool canNavigate = neighbour.isWalkable, containsInClosedSet = closedSet.Contains(neighbour);
                     if (!canNavigate || containsInClosedSet)
                         continue;
 
-                    float estimatedCost = currentNode.GCost + Get_GCost(currentNode, neighbour);
-                    if (!openSet.Contains(neighbour) || estimatedCost < neighbour.GCost)
+                    float estimatedCost = currentNode.gCost + Get_GCost(currentNode, neighbour);
+                    if (!openSet.Contains(neighbour) || estimatedCost < neighbour.gCost)
                     {
-                        neighbour.parent = currentNode;
-                        neighbour.GCost = estimatedCost;
-                        neighbour.HCost = Get_HCost(neighbour, endNode);
-                        neighbour.FCost = neighbour.GCost + neighbour.HCost;
+                        neighbour.parentNode = currentNode;
+                        neighbour.gCost = estimatedCost;
+                        neighbour.hCost = Get_HCost(neighbour, endNode);
 
                         if (!openSet.Contains(neighbour))
                             openSet.Add(neighbour);
@@ -81,54 +80,49 @@ public class Pathfinder
             return null;
         }
 
-        public static List<GridCell> GetLineOfSight(Dictionary<Vector2Int, GridCell> cellDictionary, GridCell startCell,
-            GridCell endCell)
+        public static List<Node> GetLineOfSight(Dictionary<Vector2Int, Node> nodeDictionary, Node startNode,
+            Node endNode)
         {
-            if (cellDictionary.Count <= 0)
+            if (nodeDictionary.Count <= 0)
             {
                 Debug.LogError("Cell dictionary is empty.");
                 return null;
             }
 
-            Dictionary<Vector2Int, PF_Node> temporaryNodeDictioanry = ProduceNodeDictionary(cellDictionary);
-
-            if (!DoesCellExist(startCell.gridPosition, temporaryNodeDictioanry) ||
-                !DoesCellExist(endCell.gridPosition, temporaryNodeDictioanry))
+            if (!DoesCellExist(startNode.gridPosition, nodeDictionary) ||
+                !DoesCellExist(endNode.gridPosition, nodeDictionary))
             {
                 return null;
             }
 
-            List<PF_Node> openSet = new List<PF_Node>();
-            List<PF_Node> closedSet = new List<PF_Node>();
-
-            PF_Node startNode = temporaryNodeDictioanry[startCell.gridPosition];
-            PF_Node endNode = temporaryNodeDictioanry[endCell.gridPosition];
+            ResetAllNodes(nodeDictionary);
+            List<Node> openSet = new List<Node>();
+            List<Node> closedSet = new List<Node>(); 
 
             openSet.Add(startNode);
-            startNode.GCost = 0;
-            startNode.HCost = Get_HCost(startNode, endNode);
+            startNode.gCost = 0;
+            startNode.hCost = Get_HCost(startNode, endNode);
 
             while (openSet.Count > 0)
             {
-                PF_Node currentNode = GetLowestFCostNode(openSet);
+                Node currentNode = GetLowestFCostNode(openSet);
                 openSet.Remove(currentNode);
                 closedSet.Add(currentNode);
 
-                if (!NotSameCell(currentNode.cell, endNode.cell))
+                if (!NotSameNode(currentNode, endNode))
                     return ReconstructPath(startNode, endNode);
 
-                foreach (PF_Node neighbour in GetNeighbours(currentNode.cell, temporaryNodeDictioanry, AllDirections.ToList()))
+                foreach (Node neighbour in GetNeighbours(currentNode, nodeDictionary, AllDirections.ToList()))
                 {
                     if (closedSet.Contains(neighbour))
                         continue;
 
-                    float estimatedCost = currentNode.GCost + GenericGCost;
-                    if (!openSet.Contains(neighbour) || estimatedCost < neighbour.GCost)
+                    float estimatedCost = currentNode.gCost + GenericGCost;
+                    if (!openSet.Contains(neighbour) || estimatedCost < neighbour.gCost)
                     {
-                        neighbour.parent = currentNode;
-                        neighbour.GCost = estimatedCost;
-                        neighbour.HCost = Get_HCost(neighbour, endNode);
-                        neighbour.FCost = neighbour.GCost + neighbour.HCost;
+                        neighbour.parentNode = currentNode;
+                        neighbour.gCost= estimatedCost;
+                        neighbour.hCost = Get_HCost(neighbour, endNode);
 
                         if (!openSet.Contains(neighbour))
                             openSet.Add(neighbour);
@@ -139,13 +133,13 @@ public class Pathfinder
             return null;
         }
 
-        public static bool HasLineOfSight(Dictionary<Vector2Int, GridCell> cellDictionary, GridCell startCell,
-            GridCell endCell)
+        public static bool HasLineOfSight(Dictionary<Vector2Int, Node> cellDictionary, Node startNode,
+            Node endNode)
         {
-            List<GridCell> lineOfSightCells = GetLineOfSight(cellDictionary, startCell, endCell);
+            List<Node> lineOfSightCells = GetLineOfSight(cellDictionary, startNode, endNode);
             foreach (var gridCell in lineOfSightCells)
             {
-                if (gridCell.isObstruted)
+                if (gridCell.IsObstructed)
                     return false;
             }
             return true;
@@ -153,88 +147,93 @@ public class Pathfinder
 
         // Returns all non-obstructed cells in the line of sight path
         // can be used to get all cells that have cover or an enetity within it, could be useful for collateral stuff
-        public static List<GridCell> GetAllObstructedCellsInPath(Dictionary<Vector2Int, GridCell> cellDictionary, GridCell startCell,
-            GridCell endCell)
+        public static List<Node> GetAllObstructedCellsInPath(Dictionary<Vector2Int, Node> cellDictionary, Node startCell,
+            Node endCell)
 
         {
-            List<GridCell> lineOfSightCells = GetLineOfSight(cellDictionary, startCell, endCell);
-            List<GridCell> result = new List<GridCell>();
+            List<Node> lineOfSightCells = GetLineOfSight(cellDictionary, startCell, endCell);
+            List<Node> result = new List<Node>();
             foreach (var gridCell in lineOfSightCells)
             {
-                if (!gridCell.isObstruted)
+                if (!gridCell.IsObstructed)
                     result.Add(gridCell);
             }
             return result;
         }
 
-        private static PF_Node GetLowestFCostNode(List<PF_Node> openSet)
+        private static Node GetLowestFCostNode(List<Node> openSet)
         {
-            List<PF_Node> sortedList = openSet.OrderBy(node => node.FCost).ToList();
+            List<Node> sortedList = openSet.OrderBy(node => node.fCost).ToList();
             return sortedList[0];
         }
 
-
-
-        private static List<PF_Node> GetNeighbours(GridCell targetCell, Dictionary<Vector2Int, PF_Node> cellDictionary, List<Vector2Int> neighboursDirections)
+        private static List<Node> GetNeighbours(Node targetNode, Dictionary<Vector2Int, Node> cellDictionary, List<Vector2Int> neighboursDirections)
         {
-            List<PF_Node> neighbours = new List<PF_Node>();
+            List<Node> neighbours = new List<Node>();
             foreach (var dir in neighboursDirections)
             {
-                Vector2Int checkPos = targetCell.gridPosition + dir;
-                if (cellDictionary.TryGetValue(checkPos, out PF_Node neighbour))
-                    neighbours.Add(neighbour);
+                Vector2Int checkPos = targetNode.gridPosition + dir;
+                if (cellDictionary.TryGetValue(checkPos, out Node neighbour))
+                {
+                    if (neighbour.isWalkable)
+                    {
+                        Debug.Log($"{neighbour.gridPosition} is neighbour of {targetNode.gridPosition} and walkable state : {neighbour.isWalkable}");
+                        neighbours.Add(neighbour);
+                    }
+                }
             }
             return neighbours;
         }
 
-        private static List<GridCell> ReconstructPath(PF_Node startNode, PF_Node endNode)
+        private static List<Node> ReconstructPath(Node startNode, Node endNode)
         {
-            List<GridCell> path = new List<GridCell>();
-            PF_Node currentNode = endNode;
+            List<Node> path = new List<Node>();
+            Node currentNode = endNode;
 
-            while (NotSameCell(currentNode.cell, startNode.cell))
+            while (NotSameNode(currentNode, startNode))
             {
-                path.Add(currentNode.cell);
-                currentNode = currentNode.parent;
+                path.Add(currentNode);
+                currentNode = currentNode.parentNode;
             }
-            path.Add(startNode.cell);
+            path.Add(startNode);
             path.Reverse();
             return path;
         }
 
-        private static bool NotSameCell(GridCell startCell, GridCell goalCell)
+        private static bool NotSameNode(Node nodeOne, Node nodeTwo)
         {
-            return startCell.gridPosition - goalCell.gridPosition != Vector2Int.zero;
+            return nodeOne.gridPosition - nodeTwo.gridPosition != Vector2Int.zero;
         }
 
-        private static float Get_GCost(PF_Node fromNode, PF_Node toNode)
+        private static float Get_GCost(Node fromNode, Node toNode)
         {
-            float travelCost = Vector2Int.Distance(fromNode.cell.gridPosition, toNode.cell.gridPosition);
+            float travelCost = Vector2Int.Distance(fromNode.gridPosition, toNode.gridPosition);
 
-            CellState state = toNode.cell.activeCellState;
-            return travelCost + state.dangerCost;
+            //CellState state = toNode.cell.activeCellState;
+            //return travelCost + state.dangerCost;
+            return travelCost;
         }
 
 
-        private static float Get_HCost(PF_Node currentCell, PF_Node goalCell)
+        private static float Get_HCost(Node currentNode, Node goalNode)
         {
-            return Mathf.Abs(currentCell.cell.gridPosition.x - goalCell.cell.gridPosition.x) +
-                   Mathf.Abs(currentCell.cell.gridPosition.y - goalCell.cell.gridPosition.y);
+            return Mathf.Abs(currentNode.gridPosition.x - goalNode.gridPosition.x) +
+                   Mathf.Abs(currentNode.gridPosition.y - goalNode.gridPosition.y);
         }
 
-        private static bool DoesCellExist(Vector2Int position, Dictionary<Vector2Int, PF_Node> cellDictionary)
+        private static bool DoesCellExist(Vector2Int position, Dictionary<Vector2Int, Node> cellDictionary)
         {
             return cellDictionary.ContainsKey(position);
         }
-
-        private static Dictionary<Vector2Int, PF_Node> ProduceNodeDictionary(Dictionary<Vector2Int, GridCell> cellDictionary)
+        
+        private static void ResetAllNodes(Dictionary<Vector2Int, Node> nodeDictionary)
         {
-            Dictionary<Vector2Int, PF_Node> nodeDictionary = new Dictionary<Vector2Int, PF_Node>();
-            foreach (var cellEntry in cellDictionary)
+            foreach (var node in nodeDictionary.Values)
             {
-                nodeDictionary.Add(cellEntry.Key, new PF_Node(cellEntry.Value));
+                node.parentNode = null;
+                node.gCost = float.MaxValue;
+                node.hCost = 0;
             }
-            return nodeDictionary;
         }
     }
 }

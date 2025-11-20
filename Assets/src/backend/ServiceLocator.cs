@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace src.backend
+namespace Src.Backend
 {
     public static class ServiceLocator
     {
@@ -40,6 +40,8 @@ namespace src.backend
             {
                 await Task.Delay(100); 
             }
+
+            //Debug.Log($"[ServiceLocator] {typeof(T).Name} is now registered!");
             return Get<T>();
         }
         
