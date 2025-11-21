@@ -14,6 +14,7 @@ namespace src
     public class Test : MonoBehaviour
     {
         public GameObject unit;
+        public GameObject nodeMarkerPrefab;
         private Grid grid;
         private MovementService movementService;
         // Start is called once before the first execution of Update after the MonoBehaviour is created

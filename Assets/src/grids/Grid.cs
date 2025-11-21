@@ -30,8 +30,9 @@ namespace src.grid_management
             foreach (Vector3Int pos in boundOfTileMap.allPositionsWithin)
             {
                 bool hasTile = tilemap.HasTile(pos); 
+                
                 Vector2Int gridPos = new Vector2Int(pos.x, pos.y);
-                Vector3 worldPos = tilemap.CellToWorld(pos);
+                Vector3 worldPos = tilemap.GetCellCenterWorld(pos);
                 nodes[gridPos] = new Node(gridPos, worldPos, hasTile);
                 Debug.Log($"Node added at grid position: {gridPos}, " +
                           $"real position: {worldPos}, " +
@@ -47,14 +48,11 @@ namespace src.grid_management
                 return (null, null);
             }
 
-            // ✅ Get all valid keys
             List<Vector2Int> allKeys = new List<Vector2Int>(nodes.Keys);
     
-            // ✅ Pick two random indices
             int index1 = Random.Range(0, allKeys.Count);
             int index2 = Random.Range(0, allKeys.Count);
     
-            // ✅ Ensure they're different
             while (index2 == index1)
             {
                 index2 = Random.Range(0, allKeys.Count);

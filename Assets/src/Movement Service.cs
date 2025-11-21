@@ -47,8 +47,8 @@ namespace src
             }
             
             float duration = MovementSpeed, elapsedTIme = 0;
-            Vector3 startPosition = currentNode.realPosition + gridMovement.GridMap.offset;
-            Vector3 endPosition = targetNode.realPosition + gridMovement.GridMap.offset;
+            Vector3 startPosition = currentNode.realPosition;
+            Vector3 endPosition = targetNode.realPosition;
 
             while (elapsedTIme < duration)
             {
