@@ -173,14 +173,11 @@ namespace src.pathfinding
             foreach (var dir in neighboursDirections)
             {
                 Vector2Int checkPos = targetNode.gridPosition + dir;
-                if (cellDictionary.TryGetValue(checkPos, out Node neighbour))
-                {
-                    if (neighbour.isWalkable)
-                    {
-                        Debug.Log($"{neighbour.gridPosition} is neighbour of {targetNode.gridPosition} and walkable state : {neighbour.isWalkable}");
-                        neighbours.Add(neighbour);
-                    }
-                }
+                if (!cellDictionary.TryGetValue(checkPos, out Node neighbour))
+                    continue;
+                
+                if (neighbour.isWalkable)
+                    neighbours.Add(neighbour);
             }
             return neighbours;
         }

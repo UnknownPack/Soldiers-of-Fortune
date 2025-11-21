@@ -11,11 +11,11 @@ namespace src.grids
         public GameObject unitToMove;
         public Node startNode; 
         public Node endNode; 
-        public Grid GridMap;
+        public grid_management.Grid GridMap;
         public List<Node> Path;
         public uint Cost;
 
-        public GridMovement(GameObject unit, List<Node> path, Grid gridMap)
+        public GridMovement(GameObject unit, List<Node> path, grid_management.Grid gridMap)
         {
             unitToMove = unit;
             Path = path;

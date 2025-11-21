@@ -15,7 +15,7 @@ namespace src
     {
         public GameObject unit;
         public GameObject nodeMarkerPrefab;
-        private Grid grid;
+        private grid_management.Grid grid;
         private MovementService movementService;
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         async Task Start()
