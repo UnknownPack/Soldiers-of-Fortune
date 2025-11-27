@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using src.backend;
+using src.battle.abilities;
 using UnityEngine;
 
 namespace src.battle.entities
@@ -8,6 +10,7 @@ namespace src.battle.entities
     {
         [SerializeField]private EntityStats baseStats;
         [SerializeField]private EntityStatMultipliers statMultipliers;
+        public List<AbilityName> Abilities;   
         public uint level;
     
         public EntityStats GetInitializedStats()

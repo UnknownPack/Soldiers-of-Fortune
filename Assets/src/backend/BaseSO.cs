@@ -6,7 +6,7 @@ namespace src.backend
     [CreateAssetMenu(fileName = "BaseSO")]
     public class BaseSO : ScriptableObject
     {
-        [SerializeField, HideInInspector]
+        [SerializeField]
         private uint uniqueID;
         public uint UniqueID => uniqueID;
 
