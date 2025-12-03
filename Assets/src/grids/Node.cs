@@ -17,11 +17,11 @@ namespace src.grid_management
         public float hCost;
         public float fCost => gCost + hCost;
         
-        public GameObject occupant;
+        public uint occupantID;
         public bool isWalkable;
         public Node parentNode;
         
-        public bool IsOccupied => occupant != null; 
+        public bool IsOccupied => occupantID == 0; 
         //NOTE: Replace isobstructed with cover later on
         public bool IsObstructed => !isWalkable;
     }

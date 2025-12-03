@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Src.Backend;
 using UnityEngine;
 
 namespace src.battle.abilities
@@ -9,27 +10,10 @@ namespace src.battle.abilities
         [SerializeField] private List<BaseAbility> abilities;
         private void Awake()
         {
-            throw new NotImplementedException();
-        }
+            ServiceLocator.Register(this);
+        } 
 
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
-        {
-        
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-            
-        }
-
-        private void OnDestroy()
-        {
-            throw new NotImplementedException();
-        }
-
-        private BaseAbility GetAbility(AbilityName abilityName)
+        public BaseAbility GetAbility(AbilityName abilityName)
         {
             foreach (BaseAbility ability in abilities)
             {
@@ -38,7 +22,7 @@ namespace src.battle.abilities
             }
             Debug.LogError("Ability not found: " + abilityName);
             return null;
-        }
+        } 
         
     }
 }

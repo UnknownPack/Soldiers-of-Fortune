@@ -1,6 +1,7 @@
 using System.Collections;
 using src.backend;
 using Src.Backend;
+using src.battle.entities;
 using src.grid_management;
 using src.grids;
 using UnityEngine;
@@ -25,22 +26,34 @@ namespace src
 
         public IEnumerator MoveUnit(GridMovement gridMovement)
         { 
+            EntityRegistryService entityRegistryService = ServiceLocator.Get<EntityRegistryService>();
+            EntityInstance movingEntity = entityRegistryService.GetEntity(gridMovement.unitToMoveID);
+            
+            if (movingEntity == null)
+            {
+                Debug.LogWarning("No unit to move");
+                yield break;
+            }
+            
             Node currentCell = gridMovement.startNode;
             foreach (var node in gridMovement.Path)
             {
-                // if (!gridMovement.BaseUnit.CanMove())
-                //     break;
+                currentCell.occupantID = 0;
 
-                yield return Move(currentCell, node, gridMovement);
+                yield return Move(currentCell, node, movingEntity.gameObject);
+                
                 currentCell = node;
+                currentCell.occupantID = gridMovement.unitToMoveID;
+                movingEntity.SetGridPosition(currentCell.gridPosition);
+                movingEntity.IntializedStats.ActionPoints -= 1;
             }
         }
 
         //NOTE: WILL NEED MORE SOPHISTICATED HANDLING LATER (E.G. MOVEMNT INTERUPTIONS...)
-        private IEnumerator Move(Node currentNode, Node targetNode, GridMovement gridMovement)
+        private IEnumerator Move(Node currentNode, Node targetNode, GameObject movingObject)
         {
-            GameObject unitObject = gridMovement.unitToMove;
-            if (unitObject == null)
+            EntityRegistryService entityRegistryService = ServiceLocator.Get<EntityRegistryService>(); 
+            if (movingObject == null)
             {
                 Debug.LogWarning("No unit to move");
                 yield break;
@@ -52,11 +65,11 @@ namespace src
 
             while (elapsedTIme < duration)
             {
-                unitObject.transform.position = Vector3.Lerp(startPosition, endPosition, elapsedTIme / duration);
+                movingObject.transform.position = Vector3.Lerp(startPosition, endPosition, elapsedTIme / duration);
                 elapsedTIme += Time.deltaTime;
                 yield return null;
             }
-            unitObject.transform.position = endPosition;
+            movingObject.transform.position = endPosition;
         }
     }
 }

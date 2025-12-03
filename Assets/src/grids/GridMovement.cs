@@ -8,16 +8,16 @@ namespace src.grids
 {
     public class GridMovement
     {
-        public GameObject unitToMove;
+        public uint unitToMoveID;
         public Node startNode; 
         public Node endNode; 
         public Grid GridMap;
         public List<Node> Path;
         public uint Cost;
 
-        public GridMovement(GameObject unit, List<Node> path, Grid gridMap)
+        public GridMovement(uint unitToMove, List<Node> path, Grid gridMap)
         {
-            unitToMove = unit;
+            unitToMoveID = unitToMove;
             Path = path;
             Cost = (uint)path.Count;
             startNode = Path.First();

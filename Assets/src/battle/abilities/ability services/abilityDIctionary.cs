@@ -8,8 +8,10 @@ namespace src.battle.abilities
     [System.Serializable]
     public enum AbilityType
     {
-        Singular,
-        AreaOfEffect,
+        Tile_SIngular,
+        Tile_Area,
+        Enitty_Singular,
+        Entity_Area
     }
     
     [System.Serializable]

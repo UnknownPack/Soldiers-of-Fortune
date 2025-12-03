@@ -1,3 +1,4 @@
+
 using System.Collections.Generic;
 using src.backend;
 using src.battle.abilities;
@@ -20,7 +21,9 @@ namespace src.battle.entities
                 Health = baseStats.Health * statMultipliers.HealthMultiplier,
                 Attack = baseStats.Attack * statMultipliers.AttackMultiplier,
                 Defense = baseStats.Defense * statMultipliers.DefenseMultiplier,
-                Speed = baseStats.Speed * statMultipliers.SpeedMultiplier
+                Speed = baseStats.Speed * statMultipliers.SpeedMultiplier,
+                ActionPoints = baseStats.ActionPoints,
+                MovementPoints = baseStats.MovementPoints
             };
         }
     }

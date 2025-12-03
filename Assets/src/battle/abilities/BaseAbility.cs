@@ -4,31 +4,24 @@ using UnityEngine;
 
 namespace src.battle.abilities
 {
-    [CreateAssetMenu(fileName = "BaseAbilitySO", menuName = "Scriptable Objects/BaseAbilitySO")]
-    public class BaseAbility : ScriptableObject, IAbility
+    [CreateAssetMenu(fileName = "BaseAbilitySO", menuName = "Scriptable Objects/AbilitySO/BaseAbilitySO")]
+    public abstract class BaseAbility : ScriptableObject, IAbility
     {
         public AbilityName abilityName;
         //public Sprite icon;
-        public int manaCost;
-        public float cooldown;
-        
-        public bool CanUse(EntityInstance user)
-        {
-            throw new System.NotImplementedException();
-        }
+        public int actionCost;
+        public float cooldown; 
+        public AbilityType abilityType;
 
-        public IEnumerator Execute(EntityInstance user, EntityInstance target)
-        {
-            throw new System.NotImplementedException();
-        }
+        public abstract void Execute(AbilityInfoPackage abilityInfoPackage);
     }
     
     public interface IAbility
-    {
-        bool CanUse(EntityInstance user);
-        IEnumerator Execute(EntityInstance user, EntityInstance target);
+    { 
+        void Execute(AbilityInfoPackage abilityInfoPackage);
     }
-    
 }
+
+
 
 

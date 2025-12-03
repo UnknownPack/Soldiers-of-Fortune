@@ -1,23 +1,24 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using src.backend;
 using Src.Backend;
 using src.grid_management;
-using src.grids;
 using src.pathfinding;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Grid = src.grid_management.Grid;
+using Task = System.Threading.Tasks.Task;
 
-namespace src
+namespace src.grids
 {
-    public class Test : MonoBehaviour
+    public class GridManagementService : MonoBehaviour
     {
-        public GameObject unit;
-        public GameObject nodeMarkerPrefab;
         private Grid grid;
         private MovementService movementService;
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
+        private void Awake()
+        {
+            ServiceLocator.Register(this);
+        }
+
         async Task Start()
         {
             Tilemap tilemap = GetComponent<Tilemap>();
@@ -35,5 +36,18 @@ namespace src
             }
             movementService = ServiceLocator.Get<MovementService>();
         } 
+
+        // Update is called once per frame
+        void Update()
+        {
+        
+        }
+
+        public void Movement_WalkUnit(uint unitInstanceID, Node start, Node end)
+        { 
+            List<Node> path = PathFinder.GetPath(grid.nodes, start, end);
+            GridMovement gridMovement = new GridMovement(unitInstanceID, path, grid);
+            StartCoroutine(movementService.MoveUnit(gridMovement));
+        }
     }
 }
